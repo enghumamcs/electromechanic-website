@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الكتروميكانيك</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --o:#FF5722;--o2:rgba(255,87,34,0.08);--o3:rgba(255,87,34,0.15);
+  --bg:#09090B;--bg2:#111113;--s:#18181B;--s2:#1F1F23;
+  --b:rgba(255,255,255,0.06);--b2:rgba(255,255,255,0.1);
+  --t:#FAFAFA;--t2:#A1A1AA;--t3:#52525B;
+  --ar:'Tajawal',sans-serif;--en:'Inter',sans-serif;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{background:var(--bg);color:var(--t);font-family:var(--ar);overflow-x:hidden;-webkit-font-smoothing:antialiased;cursor:none}
+
+/* CURSOR */
+#cur{position:fixed;pointer-events:none;z-index:9999;top:0;left:0}
+.cur-d{width:5px;height:5px;background:white;border-radius:50%;position:absolute;transform:translate(-50%,-50%);transition:transform 0.1s}
+.cur-r{width:32px;height:32px;border:1px solid rgba(255,255,255,0.3);border-radius:50%;position:absolute;transform:translate(-50%,-50%);transition:width 0.3s,height 0.3s,border-color 0.3s}
+body:has(a:hover) .cur-r,body:has(button:hover) .cur-r{width:50px;height:50px;border-color:rgba(255,87,34,0.7)}
+
+/* SCROLL BAR */
+#sbar{position:fixed;top:0;left:0;width:2px;height:0;background:var(--o);z-index:200;transition:height 0.05s linear}
+
+/* CANVAS */
+#cv{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.45}
+
+/* NAV */
+.nav{position:fixed;top:0;inset-inline:0;z-index:100;height:60px;display:flex;align-items:center;padding:0 48px;border-bottom:1px solid transparent;transition:all 0.4s;animation:fadeDown 0.8s cubic-bezier(0.16,1,0.3,1) forwards}
+.nav.stuck{background:rgba(9,9,11,0.85);backdrop-filter:blur(20px);border-bottom-color:var(--b)}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:none}}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo-img{width:26px;height:26px;border-radius:7px;overflow:hidden;flex-shrink:0}
+.nav-logo-img img{width:100%;height:100%;object-fit:cover}
+.nav-logo-name{font-size:15px;font-weight:700;color:var(--t);letter-spacing:-0.3px}
+.nav-mid{display:flex;gap:2px;margin:0 auto}
+.nl{color:var(--t2);text-decoration:none;font-size:13px;padding:6px 14px;border-radius:8px;transition:all 0.2s;font-weight:500}
+.nl:hover{color:var(--t);background:rgba(255,255,255,0.05)}
+.nav-end{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.ltog{display:flex;background:var(--s);border:1px solid var(--b);border-radius:8px;padding:3px;gap:2px}
+.lb{background:none;border:none;cursor:none;font-size:12px;font-weight:700;color:var(--t3);padding:4px 10px;border-radius:6px;transition:all 0.2s;font-family:var(--en)}
+.lb.on{background:var(--s2);color:var(--t)}
+.ncta{display:inline-flex;align-items:center;gap:8px;background:var(--o);color:white;text-decoration:none;padding:8px 18px;border-radius:9px;font-size:13px;font-weight:600;transition:all 0.2s;letter-spacing:-0.2px}
+.ncta:hover{opacity:0.9;transform:translateY(-1px)}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 48px 60px;position:relative;overflow:hidden}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 70% 70% at 50% 0%,black,transparent);animation:gfade 2s ease forwards;opacity:0;pointer-events:none}
+@keyframes gfade{to{opacity:1}}
+.hero-glow{position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:900px;height:700px;background:radial-gradient(ellipse at 50% 0%,rgba(255,87,34,0.13) 0%,transparent 65%);pointer-events:none;animation:glowpulse 6s ease-in-out infinite}
+@keyframes glowpulse{0%,100%{opacity:1;transform:translateX(-50%) scale(1)}50%{opacity:0.7;transform:translateX(-50%) scale(1.08)}}
+.hero-wrap{position:relative;z-index:1;width:100%;max-width:1200px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.hero-l{text-align:start}
+.hero-pill{display:inline-flex;align-items:center;gap:8px;background:var(--o2);border:1px solid rgba(255,87,34,0.2);padding:6px 14px;border-radius:100px;font-size:12px;color:var(--o);margin-bottom:28px;font-weight:600;opacity:0;animation:up 0.9s cubic-bezier(0.16,1,0.3,1) 0.2s forwards}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:var(--o);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 0 2px rgba(255,87,34,0.3)}50%{opacity:0.5;box-shadow:0 0 0 5px rgba(255,87,34,0.1)}}
+.hero-h1{font-size:clamp(40px,5.5vw,76px);font-weight:900;line-height:1.06;letter-spacing:-2px;color:var(--t);opacity:0;animation:up 1s cubic-bezier(0.16,1,0.3,1) 0.35s forwards}
+.hero-h1 .acc{color:var(--o);display:inline-block;position:relative}
+.hero-h1 .acc::after{content:'';position:absolute;bottom:-6px;left:0;width:100%;height:2px;background:var(--o);border-radius:2px;animation:lineexpand 1s cubic-bezier(0.16,1,0.3,1) 1.2s forwards;transform:scaleX(0);transform-origin:right}
+body.en-mode .hero-h1 .acc::after{transform-origin:left}
+@keyframes lineexpand{to{transform:scaleX(1);transform-origin:left}}
+.hero-p{font-size:17px;color:var(--t2);line-height:1.8;margin:24px 0 36px;max-width:480px;opacity:0;animation:up 1s cubic-bezier(0.16,1,0.3,1) 0.5s forwards}
+.hero-btns{display:flex;gap:10px;flex-wrap:wrap;opacity:0;animation:up 1s cubic-bezier(0.16,1,0.3,1) 0.65s forwards}
+.btn1{display:inline-flex;align-items:center;gap:10px;background:var(--o);color:white;text-decoration:none;padding:14px 26px;border-radius:12px;font-size:14px;font-weight:700;transition:all 0.3s;letter-spacing:-0.2px}
+.btn1:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(255,87,34,0.4)}
+.btn2{display:inline-flex;align-items:center;gap:8px;background:var(--s);color:var(--t);text-decoration:none;padding:14px 26px;border-radius:12px;font-size:14px;font-weight:500;border:1px solid var(--b2);transition:all 0.3s}
+.btn2:hover{background:var(--s2);transform:translateY(-1px)}
+.hero-facts{margin-top:40px;display:flex;gap:28px;opacity:0;animation:up 1s cubic-bezier(0.16,1,0.3,1) 0.8s forwards}
+.hf{font-size:12px;color:var(--t3);display:flex;align-items:center;gap:6px}
+.hf-dot{width:1px;height:12px;background:var(--b2)}
+@keyframes up{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+
+/* PHONE MOCKUP */
+.hero-r{display:flex;justify-content:center;align-items:center;position:relative;opacity:0;animation:up 1.2s cubic-bezier(0.16,1,0.3,1) 0.5s forwards}
+.phone-wrap{position:relative;animation:float 8s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0) rotateY(-5deg) rotateX(2deg)}50%{transform:translateY(-20px) rotateY(5deg) rotateX(-2deg)}}
+.phone-shadow{position:absolute;bottom:-50px;left:50%;transform:translateX(-50%);width:160px;height:24px;background:rgba(255,87,34,0.25);border-radius:50%;filter:blur(16px);animation:shadowpulse 8s ease-in-out infinite}
+@keyframes shadowpulse{0%,100%{transform:translateX(-50%) scaleX(1);opacity:0.8}50%{transform:translateX(-50%) scaleX(0.65);opacity:0.3}}
+.phone-frame{width:260px;background:#0A0A0C;border:1.5px solid rgba(255,255,255,0.1);border-radius:44px;padding:12px;box-shadow:0 60px 120px rgba(0,0,0,0.8),0 0 0 1px rgba(255,255,255,0.04),inset 0 1px 0 rgba(255,255,255,0.08);position:relative;perspective:1000px}
+.phone-notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:72px;height:22px;background:#0A0A0C;border-radius:0 0 14px 14px;z-index:2}
+.phone-screen{background:#111118;border-radius:32px;overflow:hidden;aspect-ratio:9/19}
+.ps-bar{background:#080810;padding:14px 18px 8px;display:flex;justify-content:space-between;font-size:10px;color:#555;font-family:var(--en)}
+.ps-head{background:linear-gradient(135deg,#111118,#161620);padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;gap:10px}
+.ps-img{width:32px;height:32px;border-radius:50%;overflow:hidden;border:1.5px solid rgba(255,87,34,0.3);flex-shrink:0}
+.ps-img img{width:100%;height:100%;object-fit:cover}
+.ps-name{font-size:12px;font-weight:700;color:white}
+.ps-sub{font-size:9px;color:#666}
+.ps-body{padding:14px;display:flex;flex-direction:column;gap:10px}
+.ps-card{background:linear-gradient(135deg,rgba(255,87,34,0.15),rgba(255,87,34,0.03));border:1px solid rgba(255,87,34,0.2);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.ps-ci{width:36px;height:36px;background:rgba(255,87,34,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ps-ci svg{width:16px;height:16px;stroke:var(--o);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ps-ct{font-size:11px;font-weight:700;color:white}
+.ps-cs{font-size:9px;color:#888;margin-top:2px}
+.ps-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ps-mini{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px;transition:background 0.3s}
+.ps-mi svg{width:16px;height:16px;stroke:#888;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ps-mt{font-size:9px;color:#666;text-align:center}
+.ps-spin{background:linear-gradient(135deg,rgba(255,87,34,0.18),rgba(255,87,34,0.05));border:1px solid rgba(255,87,34,0.25);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:8px}
+.ps-si svg{width:16px;height:16px;stroke:var(--o);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;animation:spinit 4s linear infinite}
+@keyframes spinit{to{transform:rotate(360deg)}}
+.ps-st{font-size:10px;font-weight:700;color:var(--o)}
+
+/* FLOATING CHIPS */
+.chip{position:absolute;background:var(--s);border:1px solid var(--b2);border-radius:12px;padding:10px 14px;box-shadow:0 8px 32px rgba(0,0,0,0.5);white-space:nowrap}
+.chip-1{top:8%;left:-30%;animation:chipfloat 6s ease-in-out infinite}
+.chip-2{bottom:18%;right:-28%;animation:chipfloat 8s ease-in-out infinite reverse}
+@keyframes chipfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.chip-inner{display:flex;align-items:center;gap:8px}
+.chip-ic{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.chip-ic svg{width:14px;height:14px;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chip-label{font-size:11px;font-weight:600;color:var(--t)}
+.chip-sub{font-size:10px;color:var(--t3)}
+
+/* BRANDS */
+.brands{padding:36px 0;border-top:1px solid var(--b);border-bottom:1px solid var(--b);overflow:hidden}
+.brands-label{text-align:center;font-size:11px;color:var(--t3);letter-spacing:3px;text-transform:uppercase;font-family:var(--en);font-weight:600;margin-bottom:24px}
+.brands-wrap{overflow:hidden;mask-image:linear-gradient(90deg,transparent,black 15%,black 85%,transparent)}
+.brands-track{display:flex;gap:56px;animation:scrollb 18s linear infinite;width:max-content}
+.bi{font-size:13px;font-weight:700;color:var(--t3);font-family:var(--en);text-transform:uppercase;letter-spacing:2px;white-space:nowrap;transition:color 0.3s}
+.bi:hover{color:var(--t2)}
+@keyframes scrollb{to{transform:translateX(-50%)}}
+
+/* SECTION */
+.sec{padding:110px 48px;position:relative;z-index:1}
+.sec-in{max-width:1100px;margin:0 auto}
+.stag{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--o);margin-bottom:16px;font-family:var(--en);display:inline-flex;align-items:center;gap:8px}
+.stag::before{content:'';width:16px;height:1px;background:var(--o);display:block}
+body.en-mode .stag::before{order:1}
+.sh2{font-size:clamp(30px,4vw,50px);font-weight:900;letter-spacing:-1.5px;line-height:1.1;margin-bottom:14px}
+.sp{font-size:16px;color:var(--t2);line-height:1.8;max-width:520px}
+
+/* BENTO */
+.bento{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-top:60px}
+.bc{background:var(--s);border:1px solid var(--b);border-radius:18px;padding:28px;transition:border-color 0.3s,transform 0.4s cubic-bezier(0.16,1,0.3,1);position:relative;overflow:hidden}
+.bc:hover{border-color:var(--b2);transform:translateY(-5px)}
+.bc::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,87,34,0.06),transparent 60%);opacity:0;transition:opacity 0.3s}
+.bc:hover::before{opacity:1}
+.bc.c8{grid-column:span 8}
+.bc.c4{grid-column:span 4}
+.bc.c6{grid-column:span 6}
+.bc.c4s{grid-column:span 4}
+.bico{width:44px;height:44px;background:var(--o2);border:1px solid rgba(255,87,34,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+.bico svg{width:20px;height:20px;stroke:var(--o);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.bh3{font-size:17px;font-weight:700;margin-bottom:8px;letter-spacing:-0.3px}
+.bp{font-size:13px;color:var(--t2);line-height:1.75}
+.bbadge{display:inline-block;background:var(--o2);border:1px solid rgba(255,87,34,0.15);color:var(--o);font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;margin-top:12px;text-transform:uppercase;letter-spacing:1px;font-family:var(--en)}
+
+/* HOW */
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b);border:1px solid var(--b);border-radius:18px;overflow:hidden;margin-top:60px}
+.hi{background:var(--s);padding:44px 32px;position:relative;overflow:hidden;transition:background 0.3s}
+.hi:hover{background:var(--s2)}
+.hn{font-size:72px;font-weight:900;color:rgba(255,87,34,0.07);line-height:1;margin-bottom:24px;font-family:var(--en);letter-spacing:-4px;transition:color 0.3s}
+.hi:hover .hn{color:rgba(255,87,34,0.12)}
+.hh3{font-size:16px;font-weight:700;margin-bottom:8px;letter-spacing:-0.3px}
+.hdes{font-size:13px;color:var(--t2);line-height:1.75}
+.hi-line{position:absolute;top:0;inset-inline-start:0;width:2px;height:0;background:var(--o);transition:height 0.4s cubic-bezier(0.16,1,0.3,1)}
+.hi:hover .hi-line{height:100%}
+
+/* SERVICES */
+.svgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:60px}
+.sc{background:var(--s);border:1px solid var(--b);border-radius:18px;padding:26px;transition:all 0.4s cubic-bezier(0.16,1,0.3,1);position:relative;overflow:hidden}
+.sc:hover{border-color:var(--b2);transform:translateY(-6px);box-shadow:0 20px 40px rgba(0,0,0,0.4)}
+.sc-ico{width:42px;height:42px;background:var(--s2);border:1px solid var(--b2);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;transition:all 0.3s}
+.sc-ico svg{width:18px;height:18px;stroke:var(--t2);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke 0.3s}
+.sc:hover .sc-ico{background:var(--o2);border-color:rgba(255,87,34,0.2)}
+.sc:hover .sc-ico svg{stroke:var(--o)}
+.sh3{font-size:15px;font-weight:700;margin-bottom:6px}
+.sdes{font-size:13px;color:var(--t2);line-height:1.7}
+.sarr{font-size:12px;font-weight:700;color:var(--o);margin-top:14px;opacity:0;transform:translateX(-6px);transition:all 0.3s;display:block;font-family:var(--en)}
+body.en-mode .sarr{transform:translateX(6px)}
+.sc:hover .sarr{opacity:1;transform:none}
+
+/* CTA */
+.cta-sec{padding:120px 48px;border-top:1px solid var(--b);text-align:center;position:relative;overflow:hidden;z-index:1}
+.cta-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:700px;height:500px;background:radial-gradient(ellipse,rgba(255,87,34,0.1) 0%,transparent 70%);pointer-events:none;animation:glowpulse 5s ease-in-out infinite}
+.cta-in{position:relative;z-index:1;max-width:660px;margin:0 auto}
+.cta-logo{width:72px;height:72px;border-radius:20px;overflow:hidden;margin:0 auto 28px;border:1px solid var(--b2);position:relative}
+.cta-logo img{width:100%;height:100%;object-fit:cover}
+.cta-ring{position:absolute;inset:-6px;border-radius:26px;border:1px solid rgba(255,87,34,0.25);animation:ringpulse 3s ease-in-out infinite}
+@keyframes ringpulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.05);opacity:0.4}}
+.cta-h2{font-size:clamp(34px,5vw,60px);font-weight:900;letter-spacing:-2px;margin-bottom:14px}
+.cta-p{font-size:16px;color:var(--t2);line-height:1.8;margin-bottom:40px}
+.cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.sbtn{display:flex;align-items:center;gap:12px;background:var(--t);color:var(--bg);text-decoration:none;padding:14px 24px;border-radius:14px;transition:all 0.3s;min-width:175px}
+.sbtn:hover{opacity:0.92;transform:translateY(-4px);box-shadow:0 14px 36px rgba(0,0,0,0.4)}
+.sbtn.dim{background:var(--s);color:var(--t3);border:1px solid var(--b2);cursor:not-allowed;pointer-events:none}
+.sbtn svg{width:26px;height:26px;flex-shrink:0}
+.slabel{font-size:10px;opacity:0.6;font-family:var(--en)}
+.sname{font-size:15px;font-weight:800;font-family:var(--en)}
+
+/* CONTACT */
+.con-sec{padding:90px 48px;border-top:1px solid var(--b);z-index:1;position:relative}
+.con-in{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+.con-items{margin-top:28px;display:flex;flex-direction:column;gap:10px}
+.con-item{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--t);background:var(--s);border:1px solid var(--b);padding:16px 18px;border-radius:14px;transition:all 0.3s;font-size:13px}
+.con-item:hover{border-color:var(--b2);transform:translateX(-6px)}
+body.en-mode .con-item:hover{transform:translateX(6px)}
+.con-ico{width:38px;height:38px;background:var(--s2);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.con-ico svg{width:16px;height:16px;stroke:var(--t2);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.con-lbl{font-size:10px;color:var(--t3);font-family:var(--en)}
+.con-val{font-size:14px;font-weight:600}
+.con-card{background:var(--s);border:1px solid var(--b);border-radius:18px;padding:36px}
+.con-card-logo{width:48px;height:48px;border-radius:14px;overflow:hidden;border:1px solid var(--b2);margin-bottom:16px}
+.con-card-logo img{width:100%;height:100%;object-fit:cover}
+.con-card-title{font-size:20px;font-weight:800;letter-spacing:-0.5px;margin-bottom:6px}
+.con-card-sub{font-size:13px;color:var(--t2);line-height:1.7}
+.con-credit{font-size:11px;color:var(--t3);margin-top:24px;padding-top:18px;border-top:1px solid var(--b)}
+.con-credit a{color:var(--o);text-decoration:none;font-weight:600}
+
+/* FOOTER */
+footer{padding:24px 48px;border-top:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;z-index:1;position:relative}
+.fl{display:flex;align-items:center;gap:8px;text-decoration:none}
+.fl-img{width:22px;height:22px;border-radius:6px;overflow:hidden}
+.fl-img img{width:100%;height:100%;object-fit:cover}
+.fl-name{font-size:14px;font-weight:700;color:var(--t)}
+.fc{font-size:12px;color:var(--t3);font-family:var(--en)}
+.flinks{display:flex;gap:18px}
+.flinks a{font-size:12px;color:var(--t3);text-decoration:none;transition:color 0.2s}
+.flinks a:hover{color:var(--t2)}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(28px);transition:opacity 0.85s cubic-bezier(0.16,1,0.3,1),transform 0.85s cubic-bezier(0.16,1,0.3,1)}
+.rv.on{opacity:1;transform:none}
+.d1{transition-delay:0.1s}.d2{transition-delay:0.2s}.d3{transition-delay:0.3s}
+
+/* LANG */
+.en{display:none!important}
+body.en-mode .ar{display:none!important}
+body.en-mode .en{display:revert!important}
+body.en-mode{direction:ltr;font-family:var(--en)}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .nav-mid{display:none}
+  .hero-wrap{grid-template-columns:1fr;gap:50px}
+  .hero-r{order:-1}
+  .chip{display:none}
+  .bento{grid-template-columns:1fr}
+  .bc.c8,.bc.c4,.bc.c6,.bc.c4s{grid-column:span 1}
+  .how-grid,.svgrid,.con-in{grid-template-columns:1fr}
+  .sec{padding:70px 24px}
+  .hero{padding:90px 24px 50px}
+  footer{flex-direction:column;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<canvas id="cv"></canvas>
+<div id="cur"><div class="cur-d"></div><div class="cur-r"></div></div>
+<div id="sbar"></div>
+
+<!-- NAV -->
+<header class="nav" id="nav">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-img"><img src="https://raw.githubusercontent.com/enghumamcs/generator-images/main/mainlogo.png" alt=""></div>
+    <span class="nav-logo-name ar">الكتروميكانيك</span>
+    <span class="nav-logo-name en">ElectroMechanic</span>
+  </a>
+  <nav class="nav-mid">
+    <a href="#features" class="nl"><span class="ar">المميزات</span><span class="en">Features</span></a>
+    <a href="#services" class="nl"><span class="ar">الخدمات</span><span class="en">Services</span></a>
+    <a href="#download" class="nl"><span class="ar">تحميل</span><span class="en">Download</span></a>
+    <a href="#contact" class="nl"><span class="ar">تواصل</span><span class="en">Contact</span></a>
+  </nav>
+  <div class="nav-end">
+    <div class="ltog">
+      <button class="lb on" onclick="setLang('ar',this)">AR</button>
+      <button class="lb" onclick="setLang('en',this)">EN</button>
+    </div>
+    <a href="#download" class="ncta"><span class="ar">تحميل</span><span class="en">Download</span></a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-wrap">
+    <div class="hero-l">
+      <div class="hero-pill">
+        <span class="pill-dot"></span>
+        <span class="ar">صُنع في العراق، لأهل العراق</span>
+        <span class="en">Made in Iraq, for Iraq</span>
+      </div>
+      <h1 class="hero-h1">
+        <span class="ar">مولدك يستاهل<br><span class="acc">الأفضل دائماً</span></span>
+        <span class="en">Your Generator<br><span class="acc">Deserves the Best</span></span>
+      </h1>
+      <p class="hero-p">
+        <span class="ar">بنينا الكتروميكانيك لأن المولد مو مجرد آلة. هو مصدر حياتك. نساعدك تصونه وتحافظ عليه بأبسط طريقة ممكنة.</span>
+        <span class="en">We built ElectroMechanic because your generator isn't just a machine. It's your lifeline. We help you care for it the simplest way possible.</span>
+      </p>
+      <div class="hero-btns">
+        <a href="#download" class="btn1">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span class="ar">تحميل للـ Android</span>
+          <span class="en">Download for Android</span>
+        </a>
+        <a href="#features" class="btn2">
+          <span class="ar">اعرف أكثر</span>
+          <span class="en">Learn More</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+      <div class="hero-facts">
+        <span class="hf ar">مجاني للتحميل</span>
+        <span class="hf en">Free to Download</span>
+        <span class="hf-dot"></span>
+        <span class="hf ar">بدون اشتراك</span>
+        <span class="hf en">No Subscription</span>
+        <span class="hf-dot"></span>
+        <span class="hf ar">iOS قريباً</span>
+        <span class="hf en">iOS Coming Soon</span>
+      </div>
+    </div>
+
+    <!-- PHONE -->
+    <div class="hero-r">
+      <div class="phone-wrap">
+        <div class="phone-shadow"></div>
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="ps-bar">
+              <span>9:41</span><span>●●●</span>
+            </div>
+            <div class="ps-head">
+              <div class="ps-img"><img src="https://raw.githubusercontent.com/enghumamcs/generator-images/main/mainlogo.png" alt=""></div>
+              <div>
+                <div class="ps-name">الكتروميكانيك</div>
+                <div class="ps-sub">مرحباً بك</div>
+              </div>
+            </div>
+            <div class="ps-body">
+              <div class="ps-card">
+                <div class="ps-ci">
+                  <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                </div>
+                <div>
+                  <div class="ps-ct">Perkins 2506C</div>
+                  <div class="ps-cs">آخر صيانة: 3 أشهر</div>
+                </div>
+              </div>
+              <div class="ps-grid">
+                <div class="ps-mini">
+                  <svg class="ps-mi" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                  <span class="ps-mt ar">صيانة</span><span class="ps-mt en">Service</span>
+                </div>
+                <div class="ps-mini">
+                  <svg class="ps-mi" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <span class="ps-mt ar">فحص</span><span class="ps-mt en">Diagnose</span>
+                </div>
+                <div class="ps-mini">
+                  <svg class="ps-mi" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <span class="ps-mt ar">حجز</span><span class="ps-mt en">Book</span>
+                </div>
+                <div class="ps-mini">
+                  <svg class="ps-mi" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                  <span class="ps-mt ar">غيار</span><span class="ps-mt en">Parts</span>
+                </div>
+              </div>
+              <div class="ps-spin">
+                <div class="ps-si">
+                  <svg viewBox="0 0 24 24" stroke="var(--o)" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                </div>
+                <div>
+                  <div class="ps-st ar">ادر عجلة الحظ — اربح مجاناً</div>
+                  <div class="ps-st en">Spin & Win Free Services</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chips -->
+      <div class="chip chip-1">
+        <div class="chip-inner">
+          <div class="chip-ic" style="background:rgba(34,197,94,0.1)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div>
+            <div class="chip-label ar">صيانة مكتملة</div>
+            <div class="chip-label en">Maintenance Done</div>
+            <div class="chip-sub">Perkins 2506</div>
+          </div>
+        </div>
+      </div>
+      <div class="chip chip-2">
+        <div class="chip-inner">
+          <div class="chip-ic" style="background:rgba(255,87,34,0.1)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--o)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div>
+            <div class="chip-label ar">فزت بفحص مجاني</div>
+            <div class="chip-label en">Won Free Checkup</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BRANDS -->
+<div class="brands">
+  <div class="brands-label ar">العلامات التجارية المدعومة</div>
+  <div class="brands-label en">Supported Brands</div>
+  <div class="brands-wrap">
+    <div class="brands-track">
+      <span class="bi">Perkins</span><span class="bi">Cummins</span>
+      <span class="bi">Caterpillar</span><span class="bi">Volvo Penta</span>
+      <span class="bi">MTU</span><span class="bi">Deutz</span>
+      <span class="bi">Perkins</span><span class="bi">Cummins</span>
+      <span class="bi">Caterpillar</span><span class="bi">Volvo Penta</span>
+      <span class="bi">MTU</span><span class="bi">Deutz</span>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="sec" id="features">
+  <div class="sec-in">
+    <div class="stag rv">Features</div>
+    <h2 class="sh2 rv d1"><span class="ar">كل شي بمكان واحد</span><span class="en">Everything in One Place</span></h2>
+    <p class="sp rv d2"><span class="ar">كل ميزة في التطبيق جاءت من تجربة حقيقية مع أصحاب المولدات في العراق.</span><span class="en">Every feature came from real experience with generator owners in Iraq.</span></p>
+    <div class="bento">
+      <div class="bc c8 rv">
+        <div class="bico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+        <h3 class="bh3 ar">لوحة تحكم واضحة من أول نظرة</h3>
+        <h3 class="bh3 en">Clear Dashboard at First Glance</h3>
+        <p class="bp ar">من أول ما تفتح التطبيق تشوف مولداتك، شلون حالهم، ومتى الصيانة الجاية. ما تحتاج تبحث — كل شي قدامك.</p>
+        <p class="bp en">The moment you open the app you see your generators, their status, and the next maintenance. No searching — everything is in front of you.</p>
+        <span class="bbadge ar">المفضل عند المستخدمين</span><span class="bbadge en">User Favorite</span>
+      </div>
+      <div class="bc c4 rv d1">
+        <div class="bico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <h3 class="bh3 ar">تذكيرات أسبوعية</h3><h3 class="bh3 en">Weekly Reminders</h3>
+        <p class="bp ar">ما تحتاج تتذكر — التطبيق يذكرك بالصيانة قبل موعدها.</p>
+        <p class="bp en">No need to remember — the app reminds you before maintenance is due.</p>
+      </div>
+      <div class="bc c4 rv">
+        <div class="bico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+        <h3 class="bh3 ar">تشخيص الأعطال</h3><h3 class="bh3 en">Fault Diagnosis</h3>
+        <p class="bp ar">دليل شامل للأعطال الميكانيكية والكهربائية مع خطوات الحل.</p>
+        <p class="bp en">Comprehensive guide for mechanical and electrical faults.</p>
+      </div>
+      <div class="bc c4 rv d1">
+        <div class="bico"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <h3 class="bh3 ar">نظام مكافآت</h3><h3 class="bh3 en">Rewards System</h3>
+        <p class="bp ar">سويناها لأنك تستاهل أكثر من مجرد خدمة — بعد كل زيارة ادر عجلة الحظ.</p>
+        <p class="bp en">We made it because you deserve more than just a service.</p>
+      </div>
+      <div class="bc c4 rv d2">
+        <div class="bico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <h3 class="bh3 ar">سجل الصيانة</h3><h3 class="bh3 en">Maintenance Log</h3>
+        <p class="bp ar">سجل كامل لكل زيارة وعملية صيانة لكل مولد.</p>
+        <p class="bp en">Complete record of every visit for each generator.</p>
+      </div>
+      <div class="bc c6 rv">
+        <div class="bico"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3 class="bh3 ar">بياناتك آمنة معنا</h3><h3 class="bh3 en">Your Data is Safe</h3>
+        <p class="bp ar">محفوظة على خوادم Firebase المشفرة. ما نشارك بياناتك مع أحد.</p>
+        <p class="bp en">Stored on encrypted Firebase servers. We never share your data.</p>
+      </div>
+      <div class="bc c6 rv d1">
+        <div class="bico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg></div>
+        <h3 class="bh3 ar">وضع داكن وفاتح</h3><h3 class="bh3 en">Dark & Light Mode</h3>
+        <p class="bp ar">واجهة تريح عينك في أي وقت من اليوم.</p>
+        <p class="bp en">An interface that's easy on your eyes any time of day.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW -->
+<section class="sec" id="how" style="background:var(--bg2)">
+  <div class="sec-in">
+    <div class="stag rv">How It Works</div>
+    <h2 class="sh2 rv d1"><span class="ar">بسيط من أول يوم</span><span class="en">Simple From Day One</span></h2>
+    <div class="how-grid rv d2">
+      <div class="hi">
+        <div class="hi-line"></div>
+        <div class="hn">01</div>
+        <h3 class="hh3 ar">سجّل وأضف مولدك</h3><h3 class="hh3 en">Sign Up & Add Generator</h3>
+        <p class="hdes ar">أنشئ حسابك وأضف مولداتك بالعلامة التجارية والطراز. يأخذ أقل من دقيقتين.</p>
+        <p class="hdes en">Create your account and add generators by brand and model. Takes less than two minutes.</p>
+      </div>
+      <div class="hi">
+        <div class="hi-line"></div>
+        <div class="hn">02</div>
+        <h3 class="hh3 ar">تابع وأدِر الصيانة</h3><h3 class="hh3 en">Track & Manage</h3>
+        <p class="hdes ar">احجز مواعيد، تلقَّ التذكيرات، وتابع كل زيارة فنية بالتاريخ والتفاصيل.</p>
+        <p class="hdes en">Book appointments, get reminders, track every technical visit.</p>
+      </div>
+      <div class="hi">
+        <div class="hi-line"></div>
+        <div class="hn">03</div>
+        <h3 class="hh3 ar">اكسب المكافآت</h3><h3 class="hh3 en">Earn Rewards</h3>
+        <p class="hdes ar">بعد كل زيارة مؤكدة، ادر عجلة الحظ واربح خدمات مجانية حصرية.</p>
+        <p class="hdes en">After each confirmed visit, spin the wheel and win free services.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="sec" id="services">
+  <div class="sec-in">
+    <div class="stag rv">Services</div>
+    <h2 class="sh2 rv d1"><span class="ar">خدماتنا</span><span class="en">Our Services</span></h2>
+    <div class="svgrid">
+      <div class="sc rv">
+        <div class="sc-ico"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+        <h3 class="sh3 ar">صيانة دورية</h3><h3 class="sh3 en">Periodic Maintenance</h3>
+        <p class="sdes ar">فحص يومي وأسبوعي لضمان أداء مثالي لمولدك.</p>
+        <p class="sdes en">Daily and weekly inspection for optimal generator performance.</p>
+        <span class="sarr ar">اعرف أكثر ←</span><span class="sarr en">Learn More →</span>
+      </div>
+      <div class="sc rv d1">
+        <div class="sc-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+        <h3 class="sh3 ar">فحص الأعطال</h3><h3 class="sh3 en">Fault Diagnosis</h3>
+        <p class="sdes ar">تشخيص احترافي للأعطال الميكانيكية والكهربائية.</p>
+        <p class="sdes en">Professional diagnosis of mechanical and electrical faults.</p>
+        <span class="sarr ar">اعرف أكثر ←</span><span class="sarr en">Learn More →</span>
+      </div>
+      <div class="sc rv d2">
+        <div class="sc-ico"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>
+        <h3 class="sh3 ar">تحويل أوتوماتيك</h3><h3 class="sh3 en">Auto Conversion</h3>
+        <p class="sdes ar">تحويل مولدك من يدوي لأوتوماتيك مع تركيب ATS.</p>
+        <p class="sdes en">Convert to automatic with professional ATS installation.</p>
+        <span class="sarr ar">اعرف أكثر ←</span><span class="sarr en">Learn More →</span>
+      </div>
+      <div class="sc rv">
+        <div class="sc-ico"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+        <h3 class="sh3 ar">إعادة تأهيل</h3><h3 class="sh3 en">Rehabilitation</h3>
+        <p class="sdes ar">تجديد شامل — كهربائيات، وقود، تزييت، وطلاء.</p>
+        <p class="sdes en">Full renewal — electrical, fuel, lubrication, painting.</p>
+        <span class="sarr ar">اعرف أكثر ←</span><span class="sarr en">Learn More →</span>
+      </div>
+      <div class="sc rv d1">
+        <div class="sc-ico"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+        <h3 class="sh3 ar">قطع الغيار</h3><h3 class="sh3 en">Spare Parts</h3>
+        <p class="sdes ar">قطع غيار أصلية لجميع أنواع المولدات العالمية.</p>
+        <p class="sdes en">Original parts for all international generator types.</p>
+        <span class="sarr ar">اعرف أكثر ←</span><span class="sarr en">Learn More →</span>
+      </div>
+      <div class="sc rv d2">
+        <div class="sc-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <h3 class="sh3 ar">حجز مواعيد</h3><h3 class="sh3 en">Appointments</h3>
+        <p class="sdes ar">احجز موعدك عبر التطبيق أو واتساب مباشرة.</p>
+        <p class="sdes en">Book via the app or WhatsApp directly.</p>
+        <span class="sarr ar">اعرف أكثر ←</span><span class="sarr en">Learn More →</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOAD -->
+<section class="cta-sec" id="download">
+  <div class="cta-glow"></div>
+  <div class="cta-in">
+    <div class="cta-logo rv">
+      <img src="https://raw.githubusercontent.com/enghumamcs/generator-images/main/mainlogo.png" alt="">
+      <div class="cta-ring"></div>
+    </div>
+    <h2 class="cta-h2 rv d1"><span class="ar">جاهز تبدأ؟</span><span class="en">Ready to Start?</span></h2>
+    <p class="cta-p rv d2">
+      <span class="ar">ما تحتاج خبرة تقنية. افتح التطبيق، أضف مولدك، وخلّنا نكمل الباقي معك.</span>
+      <span class="en">No technical expertise needed. Open the app, add your generator, and let us handle the rest.</span>
+    </p>
+    <div class="cta-btns rv d3">
+      <a href="#" class="sbtn">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.3.17.65.17.96 0l11.5-6.64-2.84-2.84-9.62 9.48zM.29 1.27C.1 1.58 0 1.95 0 2.36v19.28c0 .41.1.78.29 1.09l.07.07 10.8-10.8v-.25L.36 1.2l-.07.07zM20.55 9.56l-2.89-1.67-3.19 3.19 3.19 3.19 2.92-1.68c.83-.48.83-1.26-.03-1.03zM4.14.24L15.64 6.88 12.8 9.72 3.18.24c.31-.18.67-.18.96 0z"/></svg>
+        <div><div class="slabel">Get it on</div><div class="sname">Google Play</div></div>
+      </a>
+      <a class="sbtn dim">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.14-2.2 1.28-2.18 3.81.03 3.02 2.65 4.03 2.68 4.04l-.05.22zM13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        <div><div class="slabel">Coming soon on</div><div class="sname">App Store</div></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="con-sec" id="contact">
+  <div class="con-in">
+    <div>
+      <div class="stag rv">Contact</div>
+      <h2 class="sh2 rv d1"><span class="ar">تواصل معنا</span><span class="en">Get in Touch</span></h2>
+      <p class="sp rv d2"><span class="ar">ما عندك سؤال صغير — كل سؤال يهمنا. راسلنا وراح نرد عليك شخصياً.</span><span class="en">No question is too small. Message us and we'll reply personally.</span></p>
+      <div class="con-items rv d3">
+        <a href="https://wa.me/9647823438227" class="con-item" target="_blank">
+          <div class="con-ico"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <div><div class="con-lbl">WhatsApp</div><div class="con-val">+964 782 343 8227</div></div>
+        </a>
+        <a href="mailto:enghumamabdulkareem@gmail.com" class="con-item">
+          <div class="con-ico"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+          <div><div class="con-lbl">Email</div><div class="con-val">enghumamabdulkareem@gmail.com</div></div>
+        </a>
+      </div>
+    </div>
+    <div class="rv d1">
+      <div class="con-card">
+        <div class="con-card-logo"><img src="https://raw.githubusercontent.com/enghumamcs/generator-images/main/mainlogo.png" alt=""></div>
+        <h3 class="con-card-title ar">الكتروميكانيك</h3>
+        <h3 class="con-card-title en">ElectroMechanic</h3>
+        <p class="con-card-sub ar">نحن هنا لأن مولدك يستاهل الأفضل. خبراء صيانة المولدات في العراق.</p>
+        <p class="con-card-sub en">Here because your generator deserves the best. Generator experts in Iraq.</p>
+        <div class="con-credit">Designed & Developed by <a href="https://github.com/enghumamcs">enghumam</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#" class="fl">
+    <div class="fl-img"><img src="https://raw.githubusercontent.com/enghumamcs/generator-images/main/mainlogo.png" alt=""></div>
+    <span class="fl-name ar">الكتروميكانيك</span>
+    <span class="fl-name en">ElectroMechanic</span>
+  </a>
+  <span class="fc">© 2025 ElectroMechanic. All rights reserved.</span>
+  <div class="flinks">
+    <a href="privacy.html" class="ar">سياسة الخصوصية</a>
+    <a href="privacy.html" class="en">Privacy Policy</a>
+    <a href="#contact" class="ar">تواصل</a>
+    <a href="#contact" class="en">Contact</a>
+  </div>
+</footer>
+
+<script>
+// ── CURSOR ──
+const cur = document.getElementById('cur');
+const dot = cur.querySelector('.cur-d');
+const ring = cur.querySelector('.cur-r');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => {
+  mx=e.clientX; my=e.clientY;
+  cur.style.left = mx+'px'; cur.style.top = my+'px';
+});
+(function animCur(){
+  rx+=(mx-rx)*0.1; ry+=(my-ry)*0.1;
+  ring.style.left=(rx-mx)+'px'; ring.style.top=(ry-my)+'px';
+  requestAnimationFrame(animCur);
+})();
+document.querySelectorAll('a,button,.bc,.sc').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='52px';ring.style.height='52px';ring.style.borderColor='rgba(255,87,34,0.6)'});
+  el.addEventListener('mouseleave',()=>{ring.style.width='32px';ring.style.height='32px';ring.style.borderColor='rgba(255,255,255,0.3)'});
+});
+
+// ── SCROLL BAR ──
+const sbar = document.getElementById('sbar');
+window.addEventListener('scroll',()=>{
+  const pct = window.scrollY/(document.body.scrollHeight-window.innerHeight)*100;
+  sbar.style.height = pct+'%';
+  document.getElementById('nav').classList.toggle('stuck', window.scrollY>40);
+});
+
+// ── PARTICLES ──
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+function resize(){ cv.width=innerWidth; cv.height=innerHeight; }
+resize(); window.addEventListener('resize',resize);
+const pts = Array.from({length:55},()=>({
+  x:Math.random()*innerWidth, y:Math.random()*innerHeight,
+  vx:(Math.random()-.5)*.25, vy:(Math.random()-.5)*.25,
+  r:Math.random()*1.2+.3, o:Math.random()*.35+.05,
+  orange:Math.random()>.72
+}));
+let pmx=innerWidth/2,pmy=innerHeight/2;
+document.addEventListener('mousemove',e=>{pmx=e.clientX;pmy=e.clientY});
+(function draw(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  pts.forEach((p,i)=>{
+    const dx=p.x-pmx,dy=p.y-pmy,d=Math.sqrt(dx*dx+dy*dy);
+    if(d<120){p.vx+=dx/d*.04;p.vy+=dy/d*.04;}
+    p.vx*=.98;p.vy*=.98;p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0)p.x=cv.width;if(p.x>cv.width)p.x=0;
+    if(p.y<0)p.y=cv.height;if(p.y>cv.height)p.y=0;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=p.orange?`rgba(255,87,34,${p.o})`:`rgba(255,255,255,${p.o*.4})`;
+    ctx.fill();
+    pts.slice(i+1).forEach(q=>{
+      const dd=Math.hypot(p.x-q.x,p.y-q.y);
+      if(dd<90){
+        ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);
+        ctx.strokeStyle=`rgba(255,87,34,${.05*(1-dd/90)})`;
+        ctx.lineWidth=.5;ctx.stroke();
+      }
+    });
+  });
+  requestAnimationFrame(draw);
+})();
+
+// ── REVEAL ──
+const ro = new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('on')})},{threshold:.08});
+document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
+
+// ── BENTO GLOW ──
+document.querySelectorAll('.bc,.sc').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    const x=((e.clientX-r.left)/r.width*100).toFixed(1);
+    const y=((e.clientY-r.top)/r.height*100).toFixed(1);
+    card.style.setProperty('--mx',x+'%');
+    card.style.setProperty('--my',y+'%');
+  });
+});
+
+// ── MAGNETIC ──
+document.querySelectorAll('.btn1,.btn2,.ncta').forEach(btn=>{
+  btn.addEventListener('mousemove',e=>{
+    const r=btn.getBoundingClientRect();
+    const x=e.clientX-r.left-r.width/2;
+    const y=e.clientY-r.top-r.height/2;
+    btn.style.transform=`translate(${x*.15}px,${y*.15}px)`;
+  });
+  btn.addEventListener('mouseleave',()=>btn.style.transform='');
+});
+
+// ── LANG ──
+function setLang(lang,btn){
+  document.querySelectorAll('.lb').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(lang==='en'){document.body.classList.add('en-mode');document.documentElement.setAttribute('dir','ltr');}
+  else{document.body.classList.remove('en-mode');document.documentElement.setAttribute('dir','rtl');}
+}
+
+// ── PHONE SCREEN ANIMATION ──
+const minis = document.querySelectorAll('.ps-mini');
+let mi=0;
+setInterval(()=>{
+  minis.forEach(m=>m.style.background='rgba(255,255,255,0.03)');
+  minis[mi%minis.length].style.background='rgba(255,87,34,0.08)';
+  mi++;
+},1800);
+</script>
+</body>
+</html>
