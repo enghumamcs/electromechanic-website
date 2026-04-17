@@ -15,13 +15,36 @@
   --ar:'Tajawal',sans-serif;--en:'Inter',sans-serif;
 }
 html{scroll-behavior:smooth;font-size:16px}
-body{background:var(--bg);color:var(--t);font-family:var(--ar);overflow-x:hidden;-webkit-font-smoothing:antialiased;cursor:none}
+body{background:var(--bg);color:var(--t);font-family:var(--ar);overflow-x:hidden;-webkit-font-smoothing:antialiased}
 
-/* CURSOR */
-#cur{position:fixed;pointer-events:none;z-index:9999;top:0;left:0}
-.cur-d{width:5px;height:5px;background:white;border-radius:50%;position:absolute;transform:translate(-50%,-50%);transition:transform 0.1s}
-.cur-r{width:32px;height:32px;border:1px solid rgba(255,255,255,0.3);border-radius:50%;position:absolute;transform:translate(-50%,-50%);transition:width 0.3s,height 0.3s,border-color 0.3s}
-body:has(a:hover) .cur-r,body:has(button:hover) .cur-r{width:50px;height:50px;border-color:rgba(255,87,34,0.7)}
+
+
+/* BG LOGOS */
+.hero-bg-logo{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:600px;height:600px;
+  opacity:0.04;
+  pointer-events:none;
+  z-index:0;
+  filter:blur(0px);
+  animation:bglogo-pulse 8s ease-in-out infinite;
+}
+.hero-bg-logo img{width:100%;height:100%;object-fit:contain}
+@keyframes bglogo-pulse{
+  0%,100%{opacity:0.04;transform:translate(-50%,-50%) scale(1)}
+  50%{opacity:0.06;transform:translate(-50%,-50%) scale(1.05)}
+}
+.brand-logos-bg{position:absolute;inset:0;pointer-events:none;z-index:0}
+.bl{position:absolute;opacity:0.06;filter:grayscale(1) brightness(3);object-fit:contain}
+.bl-1{width:180px;top:15%;left:5%;animation:blf 7s ease-in-out infinite}
+.bl-2{width:160px;bottom:20%;left:8%;animation:blf 9s ease-in-out infinite reverse}
+.bl-3{width:200px;top:20%;right:4%;animation:blf 11s ease-in-out infinite 1s}
+@keyframes blf{
+  0%,100%{transform:translateY(0);opacity:0.06}
+  50%{transform:translateY(-14px);opacity:0.09}
+}
 
 /* SCROLL BAR */
 #sbar{position:fixed;top:0;left:0;width:2px;height:0;background:var(--o);z-index:200;transition:height 0.05s linear}
@@ -251,7 +274,7 @@ body.en-mode{direction:ltr;font-family:var(--en)}
 <body>
 
 <canvas id="cv"></canvas>
-<div id="cur"><div class="cur-d"></div><div class="cur-r"></div></div>
+
 <div id="sbar"></div>
 
 <!-- NAV -->
@@ -280,6 +303,16 @@ body.en-mode{direction:ltr;font-family:var(--en)}
 <section class="hero">
   <div class="hero-grid"></div>
   <div class="hero-glow"></div>
+  <!-- لوكو شفاف كبير -->
+  <div class="hero-bg-logo">
+    <img src="https://raw.githubusercontent.com/enghumamcs/generator-images/main/mainlogo.png" alt="">
+  </div>
+  <!-- لوكوات العلامات التجارية الشفافة -->
+  <div class="brand-logos-bg">
+    <img src="https://raw.githubusercontent.com/enghumamcs/generator-images/main/perkinslogo.png" alt="Perkins" class="bl bl-1">
+    <img src="https://raw.githubusercontent.com/enghumamcs/generator-images/main/cumminslogo.png" alt="Cummins" class="bl bl-2">
+    <img src="https://raw.githubusercontent.com/enghumamcs/generator-images/main/caterpillarlogo.png" alt="Caterpillar" class="bl bl-3">
+  </div>
   <div class="hero-wrap">
     <div class="hero-l">
       <div class="hero-pill">
@@ -634,24 +667,7 @@ body.en-mode{direction:ltr;font-family:var(--en)}
 </footer>
 
 <script>
-// ── CURSOR ──
-const cur = document.getElementById('cur');
-const dot = cur.querySelector('.cur-d');
-const ring = cur.querySelector('.cur-r');
-let mx=0,my=0,rx=0,ry=0;
-document.addEventListener('mousemove', e => {
-  mx=e.clientX; my=e.clientY;
-  cur.style.left = mx+'px'; cur.style.top = my+'px';
-});
-(function animCur(){
-  rx+=(mx-rx)*0.1; ry+=(my-ry)*0.1;
-  ring.style.left=(rx-mx)+'px'; ring.style.top=(ry-my)+'px';
-  requestAnimationFrame(animCur);
-})();
-document.querySelectorAll('a,button,.bc,.sc').forEach(el=>{
-  el.addEventListener('mouseenter',()=>{ring.style.width='52px';ring.style.height='52px';ring.style.borderColor='rgba(255,87,34,0.6)'});
-  el.addEventListener('mouseleave',()=>{ring.style.width='32px';ring.style.height='32px';ring.style.borderColor='rgba(255,255,255,0.3)'});
-});
+
 
 // ── SCROLL BAR ──
 const sbar = document.getElementById('sbar');
